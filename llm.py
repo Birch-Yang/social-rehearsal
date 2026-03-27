@@ -14,7 +14,6 @@ def _safe_json_loads(text: str, fallback: dict) -> dict:
     except json.JSONDecodeError:
         pass
 
-    # Try to extract JSON from code fences or surrounding text
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if match:
         try:
@@ -95,3 +94,24 @@ def evaluate_conversation_status(prompt: str) -> dict:
             "status": "ongoing",
             "reason": "Status evaluation temporarily failed, so the conversation will continue."
         }
+
+
+def generate_debrief(prompt: str) -> dict:
+    response = client.responses.create(
+        model="gpt-5.4-mini",
+        input=prompt
+    )
+
+    text = response.output_text.strip()
+
+    fallback = {
+        "overall_outcome": "Unresolved",
+        "success_factors": [],
+        "failure_patterns": [],
+        "actionable_advice": [
+            "Try to stay specific about the behavior you want changed."
+        ],
+        "encouragement": "Good luck — you have a clearer plan now."
+    }
+
+    return _safe_json_loads(text, fallback)

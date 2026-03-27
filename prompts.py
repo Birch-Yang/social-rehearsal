@@ -181,3 +181,49 @@ IMPORTANT STRICT RULES:
 - Be slightly conservative about declaring resolved as well.
 - Keep the reason brief and concrete.
 """
+
+
+def build_debrief_prompt(scenario: dict, history_summary: str) -> str:
+    return f"""
+You are an expert communication coach writing a final debrief for a difficult conversation rehearsal.
+
+Scenario:
+- Person: {scenario['person']}
+- Conflict type: {scenario['conflict_type']}
+- Conflict: {scenario['conflict']}
+- Personality traits: {scenario['traits']}
+- Difficulty level: {scenario['difficulty']} / 5
+- User's goal: {scenario['goal']}
+- Preferred tone: {scenario['tone']}
+
+Attempt history:
+{history_summary}
+
+Write a debrief that reflects the full attempt history, not just one turn.
+
+Return ONLY valid JSON in this exact structure:
+{{
+  "overall_outcome": "Succeeded | Mixed | Unresolved | Failed",
+  "success_factors": [
+    "string",
+    "string"
+  ],
+  "failure_patterns": [
+    "string",
+    "string"
+  ],
+  "actionable_advice": [
+    "string",
+    "string",
+    "string"
+  ],
+  "encouragement": "string"
+}}
+
+Rules:
+- If the attempts mostly failed, explain the main failure reasons and give realistic suggestions.
+- If the attempts succeeded, extract what the user did well and why it worked.
+- If there were multiple attempts with both success and failure, synthesize recurring patterns from both.
+- Make the advice specific and practical.
+- End with warm encouragement, wishing the user well.
+"""

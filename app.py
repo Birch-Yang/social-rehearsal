@@ -1,9 +1,19 @@
 import streamlit as st
 from schemas import DIFFICULTY_MAP, CONFLICT_TYPES, TONE_OPTIONS, PERSONALITY_PRESETS
-from prompts import build_conversation_map_prompt, build_simulation_system_prompt
-from llm import generate_conversation_map, simulate_reply
+from prompts import (
+    build_conversation_map_prompt,
+    build_simulation_system_prompt,
+    build_conversation_status_prompt,
+)
+from llm import (
+    generate_conversation_map,
+    simulate_reply,
+    evaluate_conversation_status,
+)
 
-st.set_page_config(page_title="Social Rehearsal", layout="wide")
+st.set_page_config(page_title="Conflict Rehearsal", layout="wide")
+
+MAX_TURNS = 30
 
 # ---------------------------
 # Session state initialization
@@ -19,6 +29,49 @@ if "simulation_started" not in st.session_state:
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
+if "conversation_status" not in st.session_state:
+    st.session_state.conversation_status = "ongoing"
+
+if "conversation_status_reason" not in st.session_state:
+    st.session_state.conversation_status_reason = ""
+
+if "status_banner_shown" not in st.session_state:
+    st.session_state.status_banner_shown = False
+
+
+def reset_simulation():
+    st.session_state.simulation_started = False
+    st.session_state.chat_history = []
+    st.session_state.conversation_status = "ongoing"
+    st.session_state.conversation_status_reason = ""
+    st.session_state.status_banner_shown = False
+
+
+def render_conversation_map(conversation_map: dict):
+    st.subheader("Recommended Opening")
+    st.write(conversation_map["recommended_opening"])
+
+    st.subheader("Likely Response Paths")
+    for path in conversation_map["response_paths"]:
+        with st.expander(path["path_name"], expanded=True):
+            st.markdown("**They might say:**")
+            st.write(path["what_they_might_say"])
+
+            st.markdown("**Why they say this:**")
+            st.write(path["why_they_say_this"])
+
+            st.markdown("**Best response:**")
+            st.write(path["best_user_response"])
+
+    st.subheader("Risk Phrases")
+    for item in conversation_map["risk_phrases"]:
+        st.write(f"- {item}")
+
+    st.subheader("Tactical Advice")
+    for item in conversation_map["tactical_advice"]:
+        st.write(f"- {item}")
+
 
 # ---------------------------
 # Header
@@ -91,13 +144,18 @@ st.markdown("---")
 if generate:
     all_traits = traits[:]
     if custom_traits.strip():
-        all_traits.append(custom_traits.strip())
+        # allow comma-separated custom traits
+        extra_traits = [t.strip() for t in custom_traits.split(",") if t.strip()]
+        all_traits.extend(extra_traits)
+
+    primary_traits = all_traits[:2] if all_traits else []
 
     scenario = {
         "person": person,
         "conflict_type": conflict_type,
         "conflict": conflict,
         "traits": ", ".join(all_traits) if all_traits else "No traits provided",
+        "primary_traits": ", ".join(primary_traits) if primary_traits else "No primary traits provided",
         "difficulty": difficulty,
         "difficulty_label": DIFFICULTY_MAP[difficulty]["label"],
         "difficulty_behavior": DIFFICULTY_MAP[difficulty]["behavior"],
@@ -106,8 +164,8 @@ if generate:
     }
 
     st.session_state.scenario = scenario
-    st.session_state.simulation_started = False
-    st.session_state.chat_history = []
+    st.session_state.conversation_map = None
+    reset_simulation()
 
     with st.spinner("Generating conversation map..."):
         prompt = build_conversation_map_prompt(scenario)
@@ -117,30 +175,7 @@ if generate:
 # Show conversation map
 # ---------------------------
 if st.session_state.conversation_map:
-    conversation_map = st.session_state.conversation_map
-
-    st.subheader("Recommended Opening")
-    st.write(conversation_map["recommended_opening"])
-
-    st.subheader("Likely Response Paths")
-    for path in conversation_map["response_paths"]:
-        with st.expander(path["path_name"], expanded=True):
-            st.markdown("**They might say:**")
-            st.write(path["what_they_might_say"])
-
-            st.markdown("**Why they say this:**")
-            st.write(path["why_they_say_this"])
-
-            st.markdown("**Best response:**")
-            st.write(path["best_user_response"])
-
-    st.subheader("Risk Phrases")
-    for item in conversation_map["risk_phrases"]:
-        st.write(f"- {item}")
-
-    st.subheader("Tactical Advice")
-    for item in conversation_map["tactical_advice"]:
-        st.write(f"- {item}")
+    render_conversation_map(st.session_state.conversation_map)
 
     st.markdown("---")
 
@@ -150,12 +185,14 @@ if st.session_state.conversation_map:
         if st.button("Start Simulation"):
             st.session_state.simulation_started = True
             st.session_state.chat_history = []
+            st.session_state.conversation_status = "ongoing"
+            st.session_state.conversation_status_reason = ""
+            st.session_state.status_banner_shown = False
             st.rerun()
 
     with col2:
         if st.button("Clear Simulation"):
-            st.session_state.simulation_started = False
-            st.session_state.chat_history = []
+            reset_simulation()
             st.rerun()
 
 # ---------------------------
@@ -164,6 +201,33 @@ if st.session_state.conversation_map:
 if st.session_state.simulation_started and st.session_state.scenario:
     st.subheader("Live Simulation")
 
+    user_turns = len([m for m in st.session_state.chat_history if m["role"] == "user"])
+    turns_remaining = MAX_TURNS - user_turns
+    st.caption(f"User turns used: {user_turns}/{MAX_TURNS}")
+
+    # End by max turns
+    if user_turns >= MAX_TURNS and st.session_state.conversation_status == "ongoing":
+        st.session_state.conversation_status = "failed"
+        st.session_state.conversation_status_reason = (
+            "The conversation hit the maximum number of turns without reaching a clear outcome."
+        )
+        st.session_state.status_banner_shown = False
+
+    # Result banner / "popup-like" feedback
+    if st.session_state.conversation_status != "ongoing":
+        if not st.session_state.status_banner_shown:
+            if st.session_state.conversation_status == "resolved":
+                st.toast("You succeeded.")
+            else:
+                st.toast("The conversation failed.")
+            st.session_state.status_banner_shown = True
+
+        if st.session_state.conversation_status == "resolved":
+            st.success(f"You succeeded. {st.session_state.conversation_status_reason}")
+            st.balloons()
+        else:
+            st.error(f"The conversation failed. {st.session_state.conversation_status_reason}")
+
     if len(st.session_state.chat_history) == 0:
         st.info("Start by sending your first message.")
 
@@ -171,7 +235,10 @@ if st.session_state.simulation_started and st.session_state.scenario:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    user_input = st.chat_input("Type your next message...")
+    # Only allow more input if still ongoing
+    user_input = None
+    if st.session_state.conversation_status == "ongoing":
+        user_input = st.chat_input("Type your next message...")
 
     if user_input:
         st.session_state.chat_history.append({
@@ -189,4 +256,57 @@ if st.session_state.simulation_started and st.session_state.scenario:
             "content": reply
         })
 
+        # Evaluate conversation status after every assistant reply
+        transcript = "\n".join(
+            [f"{msg['role'].upper()}: {msg['content']}" for msg in st.session_state.chat_history]
+        )
+
+        status_prompt = build_conversation_status_prompt(
+            st.session_state.scenario,
+            transcript
+        )
+
+        status_result = evaluate_conversation_status(status_prompt)
+        st.session_state.conversation_status = status_result["status"]
+        st.session_state.conversation_status_reason = status_result["reason"]
+        st.session_state.status_banner_shown = False
+
+        # Re-check max turns after appending this user turn
+        user_turns = len([m for m in st.session_state.chat_history if m["role"] == "user"])
+        if user_turns >= MAX_TURNS and st.session_state.conversation_status == "ongoing":
+            st.session_state.conversation_status = "failed"
+            st.session_state.conversation_status_reason = (
+                "The conversation hit the maximum number of turns without reaching a clear outcome."
+            )
+
         st.rerun()
+
+    # Retry buttons after ending
+    if st.session_state.conversation_status != "ongoing":
+        st.markdown("---")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("Retry Same Scenario"):
+                reset_simulation()
+                st.session_state.simulation_started = True
+                st.rerun()
+
+        with col2:
+            if st.button("Retry Harder Version"):
+                if st.session_state.scenario["difficulty"] < 5:
+                    st.session_state.scenario["difficulty"] += 1
+                    st.session_state.scenario["difficulty_label"] = DIFFICULTY_MAP[
+                        st.session_state.scenario["difficulty"]
+                    ]["label"]
+                    st.session_state.scenario["difficulty_behavior"] = DIFFICULTY_MAP[
+                        st.session_state.scenario["difficulty"]
+                    ]["behavior"]
+
+                with st.spinner("Regenerating conversation map..."):
+                    prompt = build_conversation_map_prompt(st.session_state.scenario)
+                    st.session_state.conversation_map = generate_conversation_map(prompt)
+
+                reset_simulation()
+                st.session_state.simulation_started = True
+                st.rerun()

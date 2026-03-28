@@ -59,7 +59,7 @@ We built Social Rehearsal to give users a low-pressure way to prepare: first by 
 - **Frontend / App Framework:** Streamlit
 - **LLM:** OpenAI Responses API (`gpt-5.4-mini`)
 - **Language:** Python
-- **Architecture:** multi-step stateful workflow with structured prompting and JSON-based 
+- **Architecture:** multi-step stateful workflow with structured prompting and JSON-based outputs
 
 ## Project Structure
 

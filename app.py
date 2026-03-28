@@ -504,6 +504,196 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.sr-difficulty-box-marker) {
 .sr-path-block {
     margin-bottom: 0.75rem;
 }
+
+/* ===== Step 3 layout ===== */
+.sr-sim-summary {
+    background: linear-gradient(180deg, #F7FBF8 0%, #FCFBFA 100%);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.sr-sim-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    gap: 1rem;
+}
+
+.sr-sim-summary-box {
+    background: rgba(255,255,255,0.78);
+    border: 1px solid #DDD8DB;
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    min-height: 92px;
+}
+
+.sr-sim-summary-title {
+    font-size: 1rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.65rem;
+}
+
+.sr-sim-summary-value {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: #4A4F61;
+}
+
+.sr-sim-goal-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+}
+
+.sr-turn-pill {
+    min-width: 86px;
+    text-align: center;
+    border-left: 1px solid #E0DBDF;
+    padding-left: 1rem;
+    font-size: 0.98rem;
+    color: #6F7387;
+    font-weight: 700;
+}
+
+.sr-chat-shell {
+    min-height: 420px;
+    margin-bottom: 1rem;
+}
+
+.sr-chat-inner {
+    padding: 0.35rem 0.25rem 0.35rem 0.25rem;
+}
+
+.sr-chat-input-shell {
+    background: rgba(255,255,255,0.8);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 0.55rem 0.75rem;
+}
+
+.sr-map-back-link {
+    font-size: 1rem;
+    color: #7A7F92;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+/* make Streamlit chat bubbles cleaner */
+div[data-testid="chat-message-container"] {
+    padding-top: 0.55rem !important;
+    padding-bottom: 0.55rem !important;
+}
+
+div[data-testid="stChatMessageContent"] {
+    border-radius: 16px !important;
+}
+
+/* chat input */
+div[data-testid="stChatInput"] {
+    margin-top: 0 !important;
+}
+
+div[data-testid="stChatInput"] textarea,
+div[data-testid="stChatInput"] input {
+    border-radius: 14px !important;
+    border: 1px solid var(--input-border) !important;
+    background: rgba(255,255,255,0.86) !important;
+}
+
+/* ===== Step 4 layout ===== */
+.sr-debrief-outcome {
+    background: linear-gradient(180deg, #F7FBF7 0%, #FCFBFA 100%);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 1.2rem 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.sr-debrief-outcome-title {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-size: 1.7rem;
+    font-weight: 800;
+    margin-bottom: 0.55rem;
+}
+
+.sr-debrief-outcome-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #4A4F61;
+}
+
+.sr-debrief-section-title {
+    font-size: 1.08rem;
+    font-weight: 800;
+    margin: 0.95rem 0 0.7rem 0;
+}
+
+.sr-debrief-card {
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 1.05rem 1.15rem;
+    min-height: 220px;
+}
+
+.sr-debrief-card-success {
+    background: linear-gradient(180deg, #FCFBFA 0%, #F7FAF8 100%);
+}
+
+.sr-debrief-card-failure {
+    background: linear-gradient(180deg, #FCFBFA 0%, #FBF4F6 100%);
+}
+
+.sr-debrief-card-title {
+    font-size: 1.02rem;
+    font-weight: 800;
+    margin-bottom: 0.7rem;
+}
+
+.sr-debrief-card ul {
+    margin: 0;
+    padding-left: 1.15rem;
+    line-height: 1.85;
+    color: #4A4F61;
+}
+
+.sr-debrief-advice {
+    background: linear-gradient(180deg, #FBFBF8 0%, #FCFBFA 100%);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 1.05rem 1.15rem;
+    margin-top: 0.2rem;
+}
+
+.sr-debrief-advice-title {
+    font-size: 1.02rem;
+    font-weight: 800;
+    margin-bottom: 0.7rem;
+}
+
+.sr-debrief-advice ul {
+    margin: 0;
+    padding-left: 1.15rem;
+    line-height: 1.85;
+    color: #4A4F61;
+}
+
+.sr-debrief-note {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 0.95rem 1.05rem;
+    margin-top: 0.9rem;
+    color: #4A4F61;
+    line-height: 1.8;
+}
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -572,6 +762,34 @@ def render_tension_meter(tension: int, max_tension: int = MAX_TENSION):
 </div>
 """
     st.markdown(html, unsafe_allow_html=True)
+    
+def render_simulation_summary_card(scenario: dict, user_turns: int):
+    st.markdown(
+        f"""
+        <div class="sr-sim-summary">
+            <div class="sr-sim-summary-grid">
+                <div class="sr-sim-summary-box">
+                    <div class="sr-sim-summary-title">
+                        <span class="sr-dot sr-dot-person"></span>
+                        Talking to
+                    </div>
+                    <div class="sr-sim-summary-value">{html_escape(scenario['person'])}</div>
+                </div>
+                <div class="sr-sim-summary-box">
+                    <div class="sr-sim-summary-title">
+                        <span class="sr-dot sr-dot-situation"></span>
+                        Goal
+                    </div>
+                    <div class="sr-sim-goal-row">
+                        <div class="sr-sim-summary-value">{html_escape(scenario['goal'])}</div>
+                        <div class="sr-turn-pill">{user_turns} / {MAX_TURNS}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_score_bar(label: str, score: int, max_score: int = 8):
@@ -764,12 +982,12 @@ def render_simulation_end_state():
 def render_debrief(debrief: dict):
     st.markdown(
         f"""
-        <div class="sr-outcome-card">
-            <div class="sr-outcome-title">
+        <div class="sr-debrief-outcome">
+            <div class="sr-debrief-outcome-title">
                 <div class="sr-icon-circle sr-icon-success">✓</div>
                 <div>Overall Outcome</div>
             </div>
-            <div style="font-size:1.08rem; line-height:1.8; color:#4A4F61;">
+            <div class="sr-debrief-outcome-text">
                 {html_escape(debrief["overall_outcome"])}
             </div>
         </div>
@@ -777,54 +995,73 @@ def render_debrief(debrief: dict):
         unsafe_allow_html=True,
     )
 
-    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
-
     scores = debrief.get("scores", {})
-    st.markdown("### Performance Breakdown")
+    st.markdown('<div class="sr-debrief-section-title">Performance Breakdown</div>', unsafe_allow_html=True)
     render_score_bar("Clarity", scores.get("clarity", 4))
     render_score_bar("Assertiveness", scores.get("assertiveness", 4))
     render_score_bar("Strategy", scores.get("strategy", 4))
     render_score_bar("Tone", scores.get("tone", 4))
 
-    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
-
     col1, col2 = st.columns(2, gap="large")
 
     with col1:
-        st.markdown('<div class="sr-card">', unsafe_allow_html=True)
-        st.markdown("### Success Factors")
-        if debrief["success_factors"]:
-            for item in debrief["success_factors"]:
-                st.write(f"- {item}")
-        else:
-            st.write("- None identified clearly yet.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        success_items = debrief.get("success_factors", [])
+        success_html = "".join(f"<li>{html_escape(item)}</li>" for item in success_items) if success_items else "<li>None identified clearly yet.</li>"
+
+        st.markdown(
+            f"""
+            <div class="sr-debrief-card sr-debrief-card-success">
+                <div class="sr-debrief-card-title">Success Factors</div>
+                <ul>
+                    {success_html}
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     with col2:
-        st.markdown('<div class="sr-card">', unsafe_allow_html=True)
-        st.markdown("### Failure Patterns")
-        if debrief["failure_patterns"]:
-            for item in debrief["failure_patterns"]:
-                st.write(f"- {item}")
-        else:
-            st.write("- No strong recurring failure pattern identified.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        failure_items = debrief.get("failure_patterns", [])
+        failure_html = "".join(f"<li>{html_escape(item)}</li>" for item in failure_items) if failure_items else "<li>No strong recurring failure pattern identified.</li>"
 
-    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div class="sr-debrief-card sr-debrief-card-failure">
+                <div class="sr-debrief-card-title">Failure Patterns</div>
+                <ul>
+                    {failure_html}
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.markdown('<div class="sr-card">', unsafe_allow_html=True)
-    st.markdown("### Actionable Advice")
-    for item in debrief["actionable_advice"]:
-        st.write(f"- {item}")
-    st.markdown('</div>', unsafe_allow_html=True)
+    advice_items = debrief.get("actionable_advice", [])
+    advice_html = "".join(f"<li>{html_escape(item)}</li>" for item in advice_items)
 
-    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="sr-debrief-advice">
+            <div class="sr-debrief-advice-title">Actionable Advice</div>
+            <ul>
+                {advice_html}
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.markdown('<div class="sr-soft-card">', unsafe_allow_html=True)
-    st.markdown("### Final Note")
-    st.write(debrief["encouragement"])
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="sr-debrief-note">
+            <strong>Final Note</strong><br>
+            {html_escape(debrief["encouragement"])}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
+    
 
 def build_history_summary() -> str:
     history_blocks = []
@@ -1062,23 +1299,12 @@ def render_simulation_page():
         st.session_state.simulation_started = True
 
     scenario = st.session_state.scenario
-
-    st.markdown(
-        f"""
-<div class="sr-card">
-    <div style="font-size:1.05rem; line-height:1.8;">
-        You are now talking to a simulated <strong>{html_escape(scenario['person'])}</strong>.<br>
-        Your goal is to <strong>{html_escape(scenario['goal'])}</strong>. Try to succeed within <strong>{MAX_TURNS} turns</strong>.
-    </div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-
-    render_tension_meter(st.session_state.tension, MAX_TENSION)
-
     user_turns = len([m for m in st.session_state.chat_history if m["role"] == "user"])
-    st.caption(f"User turns used: {user_turns}/{MAX_TURNS}")
+
+    st.markdown('<div class="sr-map-back-link">← Back to Conversation Map</div>', unsafe_allow_html=True)
+
+    render_simulation_summary_card(scenario, user_turns)
+    render_tension_meter(st.session_state.tension, MAX_TENSION)
 
     if user_turns >= MAX_TURNS and st.session_state.conversation_status == "ongoing":
         st.session_state.conversation_status = "failed"
@@ -1091,14 +1317,16 @@ def render_simulation_page():
         save_attempt_if_finished()
         render_simulation_end_state()
     else:
-        if len(st.session_state.chat_history) == 0:
-            st.info("Start by sending your first message.")
+        with st.container(border=True):
+            if len(st.session_state.chat_history) == 0:
+                st.info("Start by sending your first message.")
 
-        for msg in st.session_state.chat_history:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+            for msg in st.session_state.chat_history:
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
 
-        user_input = st.chat_input("Type your next message...")
+        with st.container(border=True):
+            user_input = st.chat_input("Type your message...")
 
         if user_input:
             st.session_state.chat_history.append({

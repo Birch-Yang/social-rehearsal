@@ -1,3 +1,4 @@
+import html
 import streamlit as st
 from schemas import DIFFICULTY_MAP, CONFLICT_TYPES, TONE_OPTIONS, PERSONALITY_PRESETS
 from prompts import (
@@ -87,12 +88,442 @@ init_session_state()
 
 
 # ---------------------------
+# Global styling
+# ---------------------------
+def inject_global_css():
+    st.markdown(
+        """
+        <style>
+        :root{
+            --bg:#FCFBFA;
+            --text:#313348;
+            --muted:#6F7387;
+            --line:#E6E0E4;
+
+            --card:#FCFBFA;
+            --card-border:#DDD8DB;
+
+            --green-soft:#EAF3EA;
+            --green-main:#7EA273;
+
+            --orange-soft:#F8E7DA;
+            --orange-main:#E08038;
+
+            --gray-soft:#ECEBEF;
+            --gray-main:#8D8999;
+
+            --button-main:#A7B8AA;
+            --button-main-dark:#99AC9C;
+
+            --input-bg:rgba(255,255,255,0.82);
+            --input-border:#D7D1D5;
+        }
+
+        html, body, [data-testid="stAppViewContainer"], .stApp {
+    background: var(--bg) !important;
+}
+
+        .block-container {
+            padding-top: 4.8rem;
+            padding-bottom: 2rem;
+            max-width: 1280px;
+        }
+
+        .sr-top-title {
+            font-size: 3.8rem !important;
+            font-weight: 800 !important;
+            line-height: 1.02 !important;
+            margin: 0 0 0.7rem 0 !important;
+            color: var(--text) !important;
+            letter-spacing: -0.04em !important;
+        }
+
+        .sr-step {
+            font-size: 1.15rem !important;
+            color: var(--muted) !important;
+            margin-bottom: 1.55rem !important;
+            font-weight: 500 !important;
+        }
+
+        .sr-lead {
+    font-size: 1.18rem !important;
+    color: #4B4F63 !important;
+    line-height: 1.75 !important;
+    max-width: 980px !important;
+    margin-bottom: 0.9rem !important;
+}
+
+        .sr-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+            padding: 1.2rem 1.25rem;
+        }
+
+        .sr-soft-card {
+            background: rgba(255,255,255,0.68);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 1.15rem 1.2rem;
+        }
+
+        .sr-divider {
+            border-top: 1px solid var(--line);
+            margin: 1rem 0 1rem 0;
+        }
+
+        .sr-page-spacer {
+            height: 10px;
+        }
+
+        .sr-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 999px;
+            display: inline-block;
+            flex: 0 0 15px;
+        }
+
+        .sr-dot-person { background: #9AA89B; }
+        .sr-dot-situation { background: #9CB7C7; }
+
+        .sr-panel-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            color: var(--text);
+        }
+
+        .sr-custom-traits-label {
+            font-size: 0.98rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .sr-difficulty-title {
+            font-size: 1.03rem;
+            font-weight: 800;
+            margin-bottom: 0.45rem;
+        }
+
+        .sr-difficulty-label {
+            font-size: 1.02rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .sr-difficulty-desc {
+            font-size: 0.99rem;
+            color: #5D6478;
+            line-height: 1.65;
+        }
+
+        /* ===== Step 1 layout ===== */
+.sr-left-card-marker,
+.sr-right-card-marker,
+.sr-footer-marker,
+.sr-traits-box-marker,
+.sr-difficulty-box-marker {
+    display: none;
+}
+
+/* 让左右两列顶部对齐 */
+div[data-testid="stHorizontalBlock"] {
+    align-items: stretch !important;
+}
+
+/* 真正卡片：只作用于 container(border=True) 生成的 wrapper */
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.sr-left-card-marker) {
+    background: #F2F7F1 !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 22px !important;
+    padding: 0.35rem !important;
+}
+
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.sr-right-card-marker) {
+    background: #F3F7FC !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 22px !important;
+    padding: 0.35rem !important;
+}
+
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.sr-footer-marker) {
+    background: rgba(255,255,255,0.82) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 18px !important;
+    padding: 0.2rem !important;
+    margin-top: 0.8rem !important;
+}
+
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.sr-traits-box-marker) {
+    background: rgba(255,255,255,0.68) !important;
+    border: 1px solid #D9D3D7 !important;
+    border-radius: 12px !important;
+    padding: 0.2rem !important;
+}
+
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.sr-difficulty-box-marker) {
+    background: rgba(255,255,255,0.78) !important;
+    border: 1px solid #DDD8DB !important;
+    border-radius: 16px !important;
+    padding: 0.2rem !important;
+    margin-top: 0.5rem !important;
+}
+
+        /* Inputs */
+        .stTextInput input,
+        .stTextArea textarea,
+        .stSelectbox div[data-baseweb="select"] > div,
+        .stMultiSelect div[data-baseweb="select"] > div {
+            border-radius: 12px !important;
+            border: 1px solid var(--input-border) !important;
+            background: var(--input-bg) !important;
+        }
+
+        .stTextInput input:focus,
+        .stTextArea textarea:focus {
+            border-color: #9CB19E !important;
+            box-shadow: 0 0 0 1px #9CB19E !important;
+        }
+
+        /* Buttons */
+        .stButton > button {
+            border-radius: 14px !important;
+            min-height: 50px !important;
+            font-weight: 600 !important;
+            border: 1px solid #D8D1D5 !important;
+            background: rgba(255,255,255,0.75) !important;
+            color: var(--text) !important;
+        }
+
+        .stButton > button:hover {
+            border-color: #C8C1C6 !important;
+            background: rgba(255,255,255,0.95) !important;
+        }
+
+        .sr-primary-btn .stButton > button {
+            border: 1px solid #9DB29F !important;
+            background: linear-gradient(90deg, #B4C2B3 0%, #A7B8AA 100%) !important;
+            color: white !important;
+            font-weight: 700 !important;
+        }
+
+        .sr-outline-btn .stButton > button {
+            background: rgba(255,255,255,0.72) !important;
+            color: var(--text) !important;
+        }
+
+        /* Slider -> green */
+        .stSlider [data-baseweb="slider"] div[role="slider"] {
+            background-color: #A7B8AA !important;
+            border-color: #93A794 !important;
+        }
+
+        .stSlider [data-baseweb="slider"] > div > div > div {
+            background: linear-gradient(90deg, #AFC0B1 0%, #DCC8BE 100%) !important;
+        }
+
+        .stSlider [data-baseweb="slider"] * {
+            color: #8FA791 !important;
+        }
+
+        /* Radio -> green */
+        .stRadio input[type="radio"] {
+            accent-color: #A7B8AA !important;
+        }
+
+        .stRadio > div {
+            gap: 0.8rem;
+        }
+
+        .streamlit-expanderHeader {
+            font-weight: 700 !important;
+        }
+
+        .sr-status-card {
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            background: rgba(255,255,255,0.55);
+        }
+
+        .sr-status-head {
+            padding: 1.25rem 1.4rem;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 1rem;
+            font-weight: 800;
+            font-size: 1.55rem;
+        }
+
+        .sr-status-body {
+            padding: 1.35rem 1.4rem 1.5rem 1.4rem;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .sr-status-head.success { background: var(--green-soft); color: #4A6344; }
+        .sr-status-head.failed { background: var(--orange-soft); color: #A95A2C; }
+        .sr-status-head.manual { background: var(--gray-soft); color: #666174; }
+
+        .sr-icon-circle {
+            width: 54px;
+            height: 54px;
+            border-radius: 999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .sr-icon-success { background: var(--green-main); }
+        .sr-icon-failed { background: var(--orange-main); }
+        .sr-icon-manual { background: var(--gray-main); }
+
+        .sr-outcome-card {
+            background: rgba(255,255,255,0.65);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 1.15rem 1.25rem;
+        }
+
+        .sr-outcome-title {
+            display:flex;
+            align-items:center;
+            gap: 1rem;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.55rem;
+        }
+        
+        /* ===== Step 2 layout ===== */
+.sr-opening-card {
+    background: linear-gradient(90deg, #FBFBF8 0%, #FCFBFA 100%);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 1.25rem 1.35rem;
+    margin-bottom: 1rem;
+}
+
+.sr-opening-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.sr-opening-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #4A4F61;
+}
+
+.sr-dual-card {
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 1.15rem 1.2rem;
+    min-height: 210px;
+}
+
+.sr-dual-green {
+    background: linear-gradient(180deg, #F7FAF8 0%, #FCFBFA 100%);
+}
+
+.sr-dual-pink {
+    background: linear-gradient(180deg, #FBF7F8 0%, #FCFBFA 100%);
+}
+
+.sr-dual-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.sr-map-section-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0.9rem 0 0.75rem 0;
+}
+
+.sr-path-card {
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    overflow: hidden;
+    background: #FCFBFA;
+    height: 100%;
+}
+
+.sr-path-head {
+    padding: 0.9rem 1rem;
+    font-size: 1rem;
+    font-weight: 800;
+    border-bottom: 1px solid #E6E0E4;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.sr-path-head.cooperative {
+    background: linear-gradient(90deg, #EEF5F1 0%, #F7FAF8 100%);
+}
+
+.sr-path-head.defensive {
+    background: linear-gradient(90deg, #F6F1E6 0%, #FBF8F1 100%);
+}
+
+.sr-path-head.difficult {
+    background: linear-gradient(90deg, #F8ECEC 0%, #FBF6F6 100%);
+}
+
+.sr-path-body {
+    padding: 1rem 1rem 1.05rem 1rem;
+    line-height: 1.75;
+    color: #4A4F61;
+}
+
+.sr-path-label {
+    font-weight: 800;
+    color: var(--text);
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.sr-path-block {
+    margin-bottom: 0.75rem;
+}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+inject_global_css()
+
+
+# ---------------------------
 # Helpers
 # ---------------------------
+def html_escape(s):
+    return html.escape(str(s))
+
+
 def save_attempt_if_finished():
     if (
         st.session_state.chat_history
-        and st.session_state.conversation_status in {"resolved", "failed"}
+        and st.session_state.conversation_status in {"resolved", "failed", "manual_end"}
     ):
         transcript = "\n".join(
             [f"{msg['role'].upper()}: {msg['content']}" for msg in st.session_state.chat_history]
@@ -108,60 +539,63 @@ def save_attempt_if_finished():
             st.session_state.attempt_history.append(attempt_record)
 
 
-def render_step_header(step_num: int, title: str):
-    st.title("Social Rehearsal")
-    st.caption(f"Step {step_num} of 4 — {title}")
+def render_step_header(step_num: int, title: str, lead: str | None = None):
+    st.markdown('<div class="sr-top-title">Social Rehearsal</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sr-step">Step {step_num} of 4 — {title}</div>', unsafe_allow_html=True)
+    if lead:
+        st.markdown(f'<div class="sr-lead">{html_escape(lead)}</div>', unsafe_allow_html=True)
 
 
 def render_tension_meter(tension: int, max_tension: int = MAX_TENSION):
     block_html = []
     for i in range(max_tension):
         if i < tension:
-            bg = "#f3f3f3"
-            border = "#f3f3f3"
+            bg = "#A8BB88"
+            border = "#A8BB88"
         else:
             bg = "transparent"
-            border = "#9a9a9a"
+            border = "#B7B0B5"
 
         block_html.append(
-            f'<div style="width:22px;height:22px;border:1px solid {border};background:{bg};display:inline-block;margin-right:4px;border-radius:3px;"></div>'
+            f'<div style="width:20px;height:20px;border:1px solid {border};background:{bg};display:inline-block;margin-right:4px;border-radius:4px;"></div>'
         )
 
     blocks = "".join(block_html)
 
     html = f"""
-<div style="background:#2b2b2f;border-radius:24px;padding:20px 24px;margin:8px 0 18px 0;">
-    <div style="color:white;font-size:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        <span style="min-width:90px;font-weight:600;">Tension:</span>
+<div style="background:#FCFBFA;border:1px solid #DDD8DB;border-radius:18px;padding:16px 18px;margin:10px 0 18px 0;">
+    <div style="color:#313348;font-size:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="min-width:90px;font-weight:700;">Tension:</span>
         <div style="display:flex;align-items:center;">{blocks}</div>
-        <span style="font-size:14px;opacity:0.8;">{tension}/{max_tension}</span>
+        <span style="font-size:13px;color:#6F7387;">{tension}/{max_tension}</span>
     </div>
 </div>
 """
     st.markdown(html, unsafe_allow_html=True)
-    
+
+
 def render_score_bar(label: str, score: int, max_score: int = 8):
     block_html = []
     for i in range(max_score):
         if i < score:
-            bg = "#f3f3f3"
-            border = "#f3f3f3"
+            bg = "#A8BB88"
+            border = "#A8BB88"
         else:
             bg = "transparent"
-            border = "#9a9a9a"
+            border = "#B7B0B5"
 
         block_html.append(
-            f'<div style="width:18px;height:18px;border:1px solid {border};background:{bg};display:inline-block;margin-right:4px;border-radius:3px;"></div>'
+            f'<div style="width:18px;height:18px;border:1px solid {border};background:{bg};display:inline-block;margin-right:4px;border-radius:4px;"></div>'
         )
 
     blocks = "".join(block_html)
 
     html = f"""
-<div style="background:#2b2b2f;border-radius:18px;padding:14px 18px;margin:8px 0;">
-    <div style="color:white;font-size:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <span style="min-width:110px;font-weight:600;">{label}:</span>
+<div style="background:#FCFBFA;border:1px solid #DDD8DB;border-radius:16px;padding:12px 16px;margin:8px 0;">
+    <div style="color:#313348;font-size:15px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="min-width:110px;font-weight:700;">{html_escape(label)}:</span>
         <div style="display:flex;align-items:center;">{blocks}</div>
-        <span style="font-size:13px;opacity:0.8;">{score}/{max_score}</span>
+        <span style="font-size:13px;color:#6F7387;">{score}/{max_score}</span>
     </div>
 </div>
 """
@@ -169,69 +603,227 @@ def render_score_bar(label: str, score: int, max_score: int = 8):
 
 
 def render_conversation_map(conversation_map: dict):
-    st.subheader("Recommended Opening")
-    st.write(conversation_map["recommended_opening"])
+    st.markdown(
+        f"""
+        <div class="sr-opening-card">
+            <div class="sr-opening-title">
+                <span class="sr-dot sr-dot-person" style="opacity:0.7;"></span>
+                Recommended Opening
+            </div>
+            <div class="sr-opening-text">{html_escape(conversation_map["recommended_opening"])}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.subheader("Likely Response Paths")
-    for path in conversation_map["response_paths"]:
-        with st.expander(path["path_name"], expanded=True):
-            st.markdown("**They might say:**")
-            st.write(path["what_they_might_say"])
+    col1, col2 = st.columns(2, gap="large")
 
-            st.markdown("**Why they say this:**")
-            st.write(path["why_they_say_this"])
+    with col1:
+        tactical_items = conversation_map.get("tactical_advice", [])
+        tactical_html = "".join(f"<li>{html_escape(item)}</li>" for item in tactical_items) if tactical_items else "<li>No tactical advice generated.</li>"
 
-            st.markdown("**Best response:**")
-            st.write(path["best_user_response"])
+        st.markdown(
+            f"""
+            <div class="sr-dual-card sr-dual-green">
+                <div class="sr-dual-title">
+                    <span class="sr-dot sr-dot-person"></span>
+                    Tactical Advice
+                </div>
+                <div style="line-height:1.9; color:#4A4F61;">
+                    <ul style="margin:0; padding-left:1.2rem;">
+                        {tactical_html}
+                    </ul>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.subheader("Risk Phrases")
-    if conversation_map["risk_phrases"]:
-        for item in conversation_map["risk_phrases"]:
-            st.write(f"- {item}")
-    else:
-        st.write("No risk phrases generated.")
+    with col2:
+        risk_items = conversation_map.get("risk_phrases", [])
+        risk_html = "".join(f"<li>{html_escape(item)}</li>" for item in risk_items) if risk_items else "<li>No risk phrases generated.</li>"
 
-    st.subheader("Tactical Advice")
-    if conversation_map["tactical_advice"]:
-        for item in conversation_map["tactical_advice"]:
-            st.write(f"- {item}")
-    else:
-        st.write("No tactical advice generated.")
+        st.markdown(
+            f"""
+            <div class="sr-dual-card sr-dual-pink">
+                <div class="sr-dual-title">
+                    <span class="sr-dot" style="background:#DFA0A0;"></span>
+                    Risk Phrases
+                </div>
+                <div style="line-height:1.9; color:#4A4F61;">
+                    <ul style="margin:0; padding-left:1.2rem;">
+                        {risk_html}
+                    </ul>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<div class="sr-map-section-title">Likely Response Paths</div>', unsafe_allow_html=True)
+
+    path_cols = st.columns(3, gap="large")
+    paths = conversation_map.get("response_paths", [])
+
+    path_styles = {
+        "Cooperative": ("cooperative", "sr-dot-person"),
+        "Defensive": ("defensive", ""),
+        "Dismissive or Difficult": ("difficult", ""),
+    }
+
+    for i, path in enumerate(paths[:3]):
+        path_name = path.get("path_name", "Path")
+        style_name, dot_class = path_styles.get(path_name, ("cooperative", "sr-dot-person"))
+
+        if dot_class:
+            dot_html = f'<span class="sr-dot {dot_class}"></span>'
+        elif style_name == "defensive":
+            dot_html = '<span class="sr-dot" style="background:#DDBB70;"></span>'
+        else:
+            dot_html = '<span class="sr-dot" style="background:#DFA0A0;"></span>'
+
+        with path_cols[i]:
+            st.markdown(
+                f"""
+                <div class="sr-path-card">
+                    <div class="sr-path-head {style_name}">
+                        {dot_html}
+                        {html_escape(path_name)}
+                    </div>
+                    <div class="sr-path-body">
+                        <div class="sr-path-block">
+                            <div class="sr-path-label">They might say:</div>
+                            <div>{html_escape(path.get("what_they_might_say", ""))}</div>
+                        </div>
+                        <div class="sr-path-block">
+                            <div class="sr-path-label">Why they say this:</div>
+                            <div>{html_escape(path.get("why_they_say_this", ""))}</div>
+                        </div>
+                        <div class="sr-path-block" style="margin-bottom:0;">
+                            <div class="sr-path-label">Best response:</div>
+                            <div>{html_escape(path.get("best_user_response", ""))}</div>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
+def derive_status_visuals():
+    status = st.session_state.conversation_status
+    reason = st.session_state.conversation_status_reason
+
+    if status == "resolved":
+        return {
+            "head_cls": "success",
+            "icon_cls": "sr-icon-success",
+            "icon": "✓",
+            "title": "Conversation Successful",
+            "line1": "You succeeded.",
+            "line2": reason or "You reached a workable agreement.",
+        }
+    if status == "manual_end":
+        return {
+            "head_cls": "manual",
+            "icon_cls": "sr-icon-manual",
+            "icon": "!",
+            "title": "Conversation Ended Manually",
+            "line1": "The exercise was intentionally ended.",
+            "line2": "You are welcome to continue or review your results.",
+        }
+    return {
+        "head_cls": "failed",
+        "icon_cls": "sr-icon-failed",
+        "icon": "✕",
+        "title": "Conversation Failed",
+        "line1": "You did not succeed.",
+        "line2": reason or "You were unable to resolve the issue before it escalated.",
+    }
+
+
+def render_simulation_end_state():
+    visuals = derive_status_visuals()
+    st.markdown(
+        f"""
+        <div class="sr-status-card">
+            <div class="sr-status-head {visuals['head_cls']}">
+                <div class="sr-icon-circle {visuals['icon_cls']}">{visuals['icon']}</div>
+                <div>{html_escape(visuals['title'])}</div>
+            </div>
+            <div class="sr-status-body">
+                <div>{html_escape(visuals['line1'])}</div>
+                <div style="margin-top:0.7rem;">{html_escape(visuals['line2'])}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_debrief(debrief: dict):
-    st.subheader("Debrief")
+    st.markdown(
+        f"""
+        <div class="sr-outcome-card">
+            <div class="sr-outcome-title">
+                <div class="sr-icon-circle sr-icon-success">✓</div>
+                <div>Overall Outcome</div>
+            </div>
+            <div style="font-size:1.08rem; line-height:1.8; color:#4A4F61;">
+                {html_escape(debrief["overall_outcome"])}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.markdown("**Overall Outcome**")
-    st.write(debrief["overall_outcome"])
+    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
 
     scores = debrief.get("scores", {})
-    st.markdown("**Performance Breakdown**")
+    st.markdown("### Performance Breakdown")
     render_score_bar("Clarity", scores.get("clarity", 4))
     render_score_bar("Assertiveness", scores.get("assertiveness", 4))
     render_score_bar("Strategy", scores.get("strategy", 4))
     render_score_bar("Tone", scores.get("tone", 4))
 
-    st.markdown("**Success Factors**")
-    if debrief["success_factors"]:
-        for item in debrief["success_factors"]:
-            st.write(f"- {item}")
-    else:
-        st.write("- None identified clearly yet.")
+    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
 
-    st.markdown("**Failure Patterns**")
-    if debrief["failure_patterns"]:
-        for item in debrief["failure_patterns"]:
-            st.write(f"- {item}")
-    else:
-        st.write("- No strong recurring failure pattern identified.")
+    col1, col2 = st.columns(2, gap="large")
 
-    st.markdown("**Actionable Advice**")
+    with col1:
+        st.markdown('<div class="sr-card">', unsafe_allow_html=True)
+        st.markdown("### Success Factors")
+        if debrief["success_factors"]:
+            for item in debrief["success_factors"]:
+                st.write(f"- {item}")
+        else:
+            st.write("- None identified clearly yet.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="sr-card">', unsafe_allow_html=True)
+        st.markdown("### Failure Patterns")
+        if debrief["failure_patterns"]:
+            for item in debrief["failure_patterns"]:
+                st.write(f"- {item}")
+        else:
+            st.write("- No strong recurring failure pattern identified.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="sr-card">', unsafe_allow_html=True)
+    st.markdown("### Actionable Advice")
     for item in debrief["actionable_advice"]:
         st.write(f"- {item}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("**Final Note**")
-    st.success(debrief["encouragement"])
+    st.markdown('<div class="sr-page-spacer"></div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="sr-soft-card">', unsafe_allow_html=True)
+    st.markdown("### Final Note")
+    st.write(debrief["encouragement"])
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 def build_history_summary() -> str:
@@ -252,14 +844,11 @@ Transcript:
 # Page 1: Setup
 # ---------------------------
 def render_setup_page():
-    render_step_header(1, "Setup")
-    st.markdown(
-        """
-Practice difficult conversations before they happen.  
-Model the other person, predict likely responses, simulate the interaction, and learn from it.
-"""
+    render_step_header(
+        1,
+        "Setup",
+        "Practice difficult conversations before they happen. Model the other person, predict likely responses, simulate the interaction, and learn from it.",
     )
-    st.markdown("---")
 
     scenario = st.session_state.scenario or {}
 
@@ -270,111 +859,160 @@ Model the other person, predict likely responses, simulate the interaction, and 
     preset_defaults = [t for t in existing_traits if t in PERSONALITY_PRESETS]
     custom_defaults = [t for t in existing_traits if t not in PERSONALITY_PRESETS]
 
-    person = st.text_input(
-        "Who are you talking to?",
-        value=scenario.get("person", ""),
-        placeholder="e.g. roommate, professor, teammate"
-    )
-
+    person = scenario.get("person", "")
     conflict_type_default = scenario.get("conflict_type", CONFLICT_TYPES[0])
     conflict_type_index = CONFLICT_TYPES.index(conflict_type_default) if conflict_type_default in CONFLICT_TYPES else 0
-    conflict_type = st.selectbox(
-        "Conflict type",
-        CONFLICT_TYPES,
-        index=conflict_type_index
-    )
-
-    conflict = st.text_area(
-        "What is the conflict?",
-        value=scenario.get("conflict", ""),
-        placeholder="Describe the problem clearly."
-    )
-
-    traits = st.multiselect(
-        "What are their personality traits?",
-        PERSONALITY_PRESETS,
-        default=preset_defaults
-    )
-
-    custom_traits = st.text_input(
-        "Add custom trait(s)",
-        value=", ".join(custom_defaults),
-        placeholder="e.g. sarcastic, controlling"
-    )
-
-    difficulty = st.slider(
-        "How difficult are they?",
-        min_value=1,
-        max_value=5,
-        value=scenario.get("difficulty", 3)
-    )
-
-    st.markdown(f"**Difficulty preview:** {DIFFICULTY_MAP[difficulty]['label']}")
-    st.caption(DIFFICULTY_MAP[difficulty]["behavior"])
-
-    goal = st.text_area(
-        "What is your goal?",
-        value=scenario.get("goal", ""),
-        placeholder="e.g. set a clear boundary, ask for accountability"
-    )
-
+    conflict = scenario.get("conflict", "")
+    difficulty = scenario.get("difficulty", 3)
+    goal = scenario.get("goal", "")
     tone_default = scenario.get("tone", TONE_OPTIONS[0])
     tone_index = TONE_OPTIONS.index(tone_default) if tone_default in TONE_OPTIONS else 0
-    tone = st.selectbox(
-        "Your preferred tone",
-        TONE_OPTIONS,
-        index=tone_index
-    )
 
-    st.markdown("---")
-    col1, col2 = st.columns([1, 1])
+    left, right = st.columns(2, gap="medium")
 
-    with col1:
-        if st.button("Generate Conversation Map", use_container_width=True):
-            all_traits = traits[:]
-            if custom_traits.strip():
-                extra_traits = [t.strip() for t in custom_traits.split(",") if t.strip()]
-                all_traits.extend(extra_traits)
+    with left:
+        with st.container(border=True):
+            st.markdown('<div class="sr-left-card-marker"></div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="sr-panel-title"><span class="sr-dot sr-dot-person"></span>The Person</div>',
+                unsafe_allow_html=True,
+            )
 
-            primary_traits = all_traits[:2] if all_traits else []
+            person = st.text_input(
+                "Who are you talking to?",
+                value=person,
+                placeholder="Enter a name, e.g., roommate, professor"
+            )
 
-            new_scenario = {
-                "person": person,
-                "conflict_type": conflict_type,
-                "conflict": conflict,
-                "traits": ", ".join(all_traits) if all_traits else "No traits provided",
-                "primary_traits": ", ".join(primary_traits) if primary_traits else "No primary traits provided",
-                "difficulty": difficulty,
-                "difficulty_label": DIFFICULTY_MAP[difficulty]["label"],
-                "difficulty_behavior": DIFFICULTY_MAP[difficulty]["behavior"],
-                "goal": goal,
-                "tone": tone,
-            }
+            conflict_type = st.selectbox(
+                "Conflict type",
+                CONFLICT_TYPES,
+                index=conflict_type_index
+            )
 
-            st.session_state.scenario = new_scenario
-            st.session_state.conversation_map = None
-            st.session_state.attempt_history = []
-            reset_simulation_only()
+            with st.container(border=True):
+                st.markdown('<div class="sr-traits-box-marker"></div>', unsafe_allow_html=True)
+                traits = st.multiselect(
+                    "Personality traits",
+                    PERSONALITY_PRESETS,
+                    default=preset_defaults
+                )
 
-            with st.spinner("Generating conversation map..."):
-                prompt = build_conversation_map_prompt(new_scenario)
-                st.session_state.conversation_map = generate_conversation_map(prompt)
+            st.markdown('<div class="sr-custom-traits-label">Add custom traits</div>', unsafe_allow_html=True)
+            custom_traits = st.text_input(
+                "Add custom traits",
+                value=", ".join(custom_defaults),
+                placeholder="e.g. sarcastic, controlling",
+                label_visibility="collapsed"
+            )
 
-            st.session_state.current_step = 2
-            st.rerun()
+            with st.container(border=True):
+                st.markdown('<div class="sr-difficulty-box-marker"></div>', unsafe_allow_html=True)
+                st.markdown('<div class="sr-difficulty-title">How difficult are they?</div>', unsafe_allow_html=True)
 
-    with col2:
-        if st.button("Start Over", use_container_width=True):
-            reset_all()
-            st.rerun()
+                difficulty = st.slider(
+                    "How difficult are they?",
+                    min_value=1,
+                    max_value=5,
+                    value=difficulty,
+                    label_visibility="collapsed"
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="sr-difficulty-label">{DIFFICULTY_MAP[difficulty]['label']}</div>
+                    <div class="sr-difficulty-desc">{DIFFICULTY_MAP[difficulty]["behavior"]}</div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    with right:
+        with st.container(border=True):
+            st.markdown('<div class="sr-right-card-marker"></div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="sr-panel-title"><span class="sr-dot sr-dot-situation"></span>The Situation</div>',
+                unsafe_allow_html=True,
+            )
+
+            conflict = st.text_area(
+                "What is the conflict?",
+                value=conflict,
+                placeholder="Describe the situation...",
+                height=170
+            )
+
+            goal = st.text_area(
+                "What is your goal?",
+                value=goal,
+                placeholder="Describe your objective...",
+                height=170
+            )
+
+            tone = st.radio(
+                "Your preferred tone",
+                TONE_OPTIONS,
+                index=tone_index,
+                horizontal=True
+            )
+
+    with st.container(border=True):
+        st.markdown('<div class="sr-footer-marker"></div>', unsafe_allow_html=True)
+        footer_cols = st.columns([1.25, 4.1, 2.35])
+
+        with footer_cols[0]:
+            st.markdown('<div class="sr-outline-btn">', unsafe_allow_html=True)
+            if st.button("Start Over", use_container_width=True):
+                reset_all()
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with footer_cols[2]:
+            st.markdown('<div class="sr-primary-btn">', unsafe_allow_html=True)
+            if st.button("Next: Generate Conversation Map", use_container_width=True):
+                all_traits = traits[:]
+                if custom_traits.strip():
+                    extra_traits = [t.strip() for t in custom_traits.split(",") if t.strip()]
+                    all_traits.extend(extra_traits)
+
+                primary_traits = all_traits[:2] if all_traits else []
+
+                new_scenario = {
+                    "person": person,
+                    "conflict_type": conflict_type,
+                    "conflict": conflict,
+                    "traits": ", ".join(all_traits) if all_traits else "No traits provided",
+                    "primary_traits": ", ".join(primary_traits) if primary_traits else "No primary traits provided",
+                    "difficulty": difficulty,
+                    "difficulty_label": DIFFICULTY_MAP[difficulty]["label"],
+                    "difficulty_behavior": DIFFICULTY_MAP[difficulty]["behavior"],
+                    "goal": goal,
+                    "tone": tone,
+                }
+
+                st.session_state.scenario = new_scenario
+                st.session_state.conversation_map = None
+                st.session_state.attempt_history = []
+                reset_simulation_only()
+
+                with st.spinner("Generating conversation map..."):
+                    prompt = build_conversation_map_prompt(new_scenario)
+                    st.session_state.conversation_map = generate_conversation_map(prompt)
+
+                st.session_state.current_step = 2
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ---------------------------
 # Page 2: Conversation Map
 # ---------------------------
 def render_map_page():
-    render_step_header(2, "Conversation Map")
-    st.markdown("---")
+    render_step_header(
+        2,
+        "Conversation Map",
+        "Preview how this conversation may unfold and decide how to respond.",
+    )
+    st.markdown('<div class="sr-divider"></div>', unsafe_allow_html=True)
 
     if not st.session_state.conversation_map:
         st.warning("No conversation map found yet. Please generate one first.")
@@ -385,19 +1023,25 @@ def render_map_page():
 
     render_conversation_map(st.session_state.conversation_map)
 
-    st.markdown("---")
-    col1, col2 = st.columns([1, 1])
+    st.markdown('<div class="sr-divider"></div>', unsafe_allow_html=True)
 
-    with col1:
-        if st.button("Back", use_container_width=True):
-            st.session_state.current_step = 1
-            st.rerun()
+    with st.container(border=True):
+        footer_cols = st.columns([1.25, 4.1, 2.35])
 
-    with col2:
-        if st.button("Continue to Simulation", use_container_width=True):
-            st.session_state.current_step = 3
-            st.session_state.simulation_started = True
-            st.rerun()
+        with footer_cols[0]:
+            st.markdown('<div class="sr-outline-btn">', unsafe_allow_html=True)
+            if st.button("Back", use_container_width=True):
+                st.session_state.current_step = 1
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with footer_cols[2]:
+            st.markdown('<div class="sr-primary-btn">', unsafe_allow_html=True)
+            if st.button("Continue to Simulation", use_container_width=True):
+                st.session_state.current_step = 3
+                st.session_state.simulation_started = True
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ---------------------------
@@ -405,7 +1049,7 @@ def render_map_page():
 # ---------------------------
 def render_simulation_page():
     render_step_header(3, "Simulation")
-    st.markdown("---")
+    st.markdown('<div class="sr-divider"></div>', unsafe_allow_html=True)
 
     if not st.session_state.scenario or not st.session_state.conversation_map:
         st.warning("You need to complete the earlier steps first.")
@@ -421,9 +1065,14 @@ def render_simulation_page():
 
     st.markdown(
         f"""
-You are now talking to a simulated **{scenario['person']}**.  
-Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turns**.
-"""
+<div class="sr-card">
+    <div style="font-size:1.05rem; line-height:1.8;">
+        You are now talking to a simulated <strong>{html_escape(scenario['person'])}</strong>.<br>
+        Your goal is to <strong>{html_escape(scenario['goal'])}</strong>. Try to succeed within <strong>{MAX_TURNS} turns</strong>.
+    </div>
+</div>
+""",
+        unsafe_allow_html=True,
     )
 
     render_tension_meter(st.session_state.tension, MAX_TENSION)
@@ -439,102 +1088,89 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
         st.session_state.status_banner_shown = False
 
     if st.session_state.conversation_status != "ongoing":
-        if not st.session_state.status_banner_shown:
-            if st.session_state.conversation_status == "resolved":
-                st.toast("You succeeded.")
-            else:
-                st.toast("The conversation ended.")
-            st.session_state.status_banner_shown = True
-
-        if st.session_state.conversation_status == "resolved":
-            st.success(f"You succeeded. {st.session_state.conversation_status_reason}")
-        else:
-            st.error(f"The conversation ended. {st.session_state.conversation_status_reason}")
-
         save_attempt_if_finished()
+        render_simulation_end_state()
+    else:
+        if len(st.session_state.chat_history) == 0:
+            st.info("Start by sending your first message.")
 
-    if len(st.session_state.chat_history) == 0:
-        st.info("Start by sending your first message.")
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    for msg in st.session_state.chat_history:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-
-    user_input = None
-    if st.session_state.conversation_status == "ongoing":
         user_input = st.chat_input("Type your next message...")
 
-    if user_input:
-        st.session_state.chat_history.append({
-            "role": "user",
-            "content": user_input
-        })
+        if user_input:
+            st.session_state.chat_history.append({
+                "role": "user",
+                "content": user_input
+            })
 
-        system_prompt = build_simulation_system_prompt(st.session_state.scenario)
+            system_prompt = build_simulation_system_prompt(st.session_state.scenario)
 
-        with st.spinner("They are responding..."):
-            reply = simulate_reply(system_prompt, st.session_state.chat_history)
+            with st.spinner("They are responding..."):
+                reply = simulate_reply(system_prompt, st.session_state.chat_history)
 
-        st.session_state.chat_history.append({
-            "role": "assistant",
-            "content": reply
-        })
+            st.session_state.chat_history.append({
+                "role": "assistant",
+                "content": reply
+            })
 
-        recent_history = st.session_state.chat_history[-6:]
-        transcript = "\n".join(
-            [f"{msg['role'].upper()}: {msg['content']}" for msg in recent_history]
-        )
-
-        status_prompt = build_conversation_status_prompt(
-            st.session_state.scenario,
-            transcript,
-            st.session_state.tension,
-            MAX_TENSION
-        )
-        status_result = evaluate_conversation_status(status_prompt)
-
-        user_turns = len([m for m in st.session_state.chat_history if m["role"] == "user"])
-        if user_turns < 2 and status_result["status"] == "failed":
-            status_result["status"] = "ongoing"
-            status_result["reason"] = "The conversation is still too early to count as a clear failure."
-
-        tension_delta = status_result.get("tension_delta", 0)
-        difficulty = st.session_state.scenario.get("difficulty", 3)
-
-        if difficulty <= 2:
-            tension_delta = max(-2, min(1, tension_delta))
-        elif difficulty == 3:
-            tension_delta = max(-2, min(2, tension_delta))
-        elif difficulty >= 4:
-            tension_delta = max(-1, min(2, tension_delta))
-
-        st.session_state.tension = max(
-            0,
-            min(MAX_TENSION, st.session_state.tension + tension_delta)
-        )
-
-        st.session_state.conversation_status = status_result["status"]
-        st.session_state.conversation_status_reason = status_result["reason"]
-        st.session_state.status_banner_shown = False
-
-        if (
-            st.session_state.tension >= MAX_TENSION
-            and st.session_state.conversation_status == "ongoing"
-        ):
-            st.session_state.conversation_status = "failed"
-            st.session_state.conversation_status_reason = (
-                "The conversation hit a breaking point after tension reached its maximum."
+            recent_history = st.session_state.chat_history[-6:]
+            transcript = "\n".join(
+                [f"{msg['role'].upper()}: {msg['content']}" for msg in recent_history]
             )
 
-        if user_turns >= MAX_TURNS and st.session_state.conversation_status == "ongoing":
-            st.session_state.conversation_status = "failed"
-            st.session_state.conversation_status_reason = (
-                "The conversation hit the maximum number of turns without reaching a clear outcome."
+            status_prompt = build_conversation_status_prompt(
+                st.session_state.scenario,
+                transcript,
+                st.session_state.tension,
+                MAX_TENSION
+            )
+            status_result = evaluate_conversation_status(status_prompt)
+
+            user_turns = len([m for m in st.session_state.chat_history if m["role"] == "user"])
+            if user_turns < 2 and status_result["status"] == "failed":
+                status_result["status"] = "ongoing"
+                status_result["reason"] = "The conversation is still too early to count as a clear failure."
+
+            tension_delta = status_result.get("tension_delta", 0)
+            difficulty = st.session_state.scenario.get("difficulty", 3)
+
+            if difficulty <= 2:
+                tension_delta = max(-2, min(1, tension_delta))
+            elif difficulty == 3:
+                tension_delta = max(-2, min(2, tension_delta))
+            elif difficulty >= 4:
+                tension_delta = max(-1, min(2, tension_delta))
+
+            st.session_state.tension = max(
+                0,
+                min(MAX_TENSION, st.session_state.tension + tension_delta)
             )
 
-        st.rerun()
+            st.session_state.conversation_status = status_result["status"]
+            st.session_state.conversation_status_reason = status_result["reason"]
+            st.session_state.status_banner_shown = False
 
-    st.markdown("---")
+            if (
+                st.session_state.tension >= MAX_TENSION
+                and st.session_state.conversation_status == "ongoing"
+            ):
+                st.session_state.conversation_status = "failed"
+                st.session_state.conversation_status_reason = (
+                    "The conversation hit a breaking point after tension reached its maximum."
+                )
+
+            if user_turns >= MAX_TURNS and st.session_state.conversation_status == "ongoing":
+                st.session_state.conversation_status = "failed"
+                st.session_state.conversation_status_reason = (
+                    "The conversation hit the maximum number of turns without reaching a clear outcome."
+                )
+
+            st.rerun()
+
+    st.markdown('<div class="sr-divider"></div>', unsafe_allow_html=True)
 
     if st.session_state.conversation_status == "ongoing":
         col1, col2 = st.columns(2)
@@ -546,9 +1182,9 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
 
         with col2:
             if st.button("Force End", use_container_width=True):
-                st.session_state.conversation_status = "failed"
+                st.session_state.conversation_status = "manual_end"
                 st.session_state.conversation_status_reason = (
-                    "The simulation was ended manually before a clear resolution was reached."
+                    "The exercise was intentionally ended."
                 )
                 st.session_state.status_banner_shown = False
                 save_attempt_if_finished()
@@ -613,7 +1249,7 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
 # ---------------------------
 def render_debrief_page():
     render_step_header(4, "Debrief")
-    st.markdown("---")
+    st.markdown('<div class="sr-divider"></div>', unsafe_allow_html=True)
 
     if not st.session_state.debrief_result:
         st.warning("No debrief found yet. Finish a simulation first.")
@@ -630,7 +1266,7 @@ def render_debrief_page():
 
     render_debrief(st.session_state.debrief_result)
 
-    st.markdown("---")
+    st.markdown('<div class="sr-divider"></div>', unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1])
 
     with col1:

@@ -16,6 +16,7 @@ from llm import (
 st.set_page_config(page_title="Social Rehearsal", layout="wide")
 
 MAX_TURNS = 30
+MAX_TENSION = 8
 
 
 # ---------------------------
@@ -33,10 +34,29 @@ def init_session_state():
         "status_banner_shown": False,
         "attempt_history": [],
         "debrief_result": None,
+        "tension": 0,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+
+
+def get_initial_tension(scenario: dict | None) -> int:
+    if not scenario:
+        return 0
+
+    difficulty = scenario.get("difficulty", 3)
+
+    if difficulty == 1:
+        return 1
+    elif difficulty == 2:
+        return 2
+    elif difficulty == 3:
+        return 3
+    elif difficulty == 4:
+        return 4
+    else:
+        return 5
 
 
 def reset_simulation_only():
@@ -46,6 +66,7 @@ def reset_simulation_only():
     st.session_state.conversation_status_reason = ""
     st.session_state.status_banner_shown = False
     st.session_state.debrief_result = None
+    st.session_state.tension = get_initial_tension(st.session_state.scenario)
 
 
 def reset_all():
@@ -59,6 +80,7 @@ def reset_all():
     st.session_state.status_banner_shown = False
     st.session_state.attempt_history = []
     st.session_state.debrief_result = None
+    st.session_state.tension = 0
 
 
 init_session_state()
@@ -89,6 +111,61 @@ def save_attempt_if_finished():
 def render_step_header(step_num: int, title: str):
     st.title("Social Rehearsal")
     st.caption(f"Step {step_num} of 4 — {title}")
+
+
+def render_tension_meter(tension: int, max_tension: int = MAX_TENSION):
+    block_html = []
+    for i in range(max_tension):
+        if i < tension:
+            bg = "#f3f3f3"
+            border = "#f3f3f3"
+        else:
+            bg = "transparent"
+            border = "#9a9a9a"
+
+        block_html.append(
+            f'<div style="width:22px;height:22px;border:1px solid {border};background:{bg};display:inline-block;margin-right:4px;border-radius:3px;"></div>'
+        )
+
+    blocks = "".join(block_html)
+
+    html = f"""
+<div style="background:#2b2b2f;border-radius:24px;padding:20px 24px;margin:8px 0 18px 0;">
+    <div style="color:white;font-size:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <span style="min-width:90px;font-weight:600;">Tension:</span>
+        <div style="display:flex;align-items:center;">{blocks}</div>
+        <span style="font-size:14px;opacity:0.8;">{tension}/{max_tension}</span>
+    </div>
+</div>
+"""
+    st.markdown(html, unsafe_allow_html=True)
+    
+def render_score_bar(label: str, score: int, max_score: int = 8):
+    block_html = []
+    for i in range(max_score):
+        if i < score:
+            bg = "#f3f3f3"
+            border = "#f3f3f3"
+        else:
+            bg = "transparent"
+            border = "#9a9a9a"
+
+        block_html.append(
+            f'<div style="width:18px;height:18px;border:1px solid {border};background:{bg};display:inline-block;margin-right:4px;border-radius:3px;"></div>'
+        )
+
+    blocks = "".join(block_html)
+
+    html = f"""
+<div style="background:#2b2b2f;border-radius:18px;padding:14px 18px;margin:8px 0;">
+    <div style="color:white;font-size:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="min-width:110px;font-weight:600;">{label}:</span>
+        <div style="display:flex;align-items:center;">{blocks}</div>
+        <span style="font-size:13px;opacity:0.8;">{score}/{max_score}</span>
+    </div>
+</div>
+"""
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_conversation_map(conversation_map: dict):
@@ -127,6 +204,13 @@ def render_debrief(debrief: dict):
 
     st.markdown("**Overall Outcome**")
     st.write(debrief["overall_outcome"])
+
+    scores = debrief.get("scores", {})
+    st.markdown("**Performance Breakdown**")
+    render_score_bar("Clarity", scores.get("clarity", 4))
+    render_score_bar("Assertiveness", scores.get("assertiveness", 4))
+    render_score_bar("Strategy", scores.get("strategy", 4))
+    render_score_bar("Tone", scores.get("tone", 4))
 
     st.markdown("**Success Factors**")
     if debrief["success_factors"]:
@@ -342,6 +426,8 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
 """
     )
 
+    render_tension_meter(st.session_state.tension, MAX_TENSION)
+
     user_turns = len([m for m in st.session_state.chat_history if m["role"] == "user"])
     st.caption(f"User turns used: {user_turns}/{MAX_TURNS}")
 
@@ -352,7 +438,6 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
         )
         st.session_state.status_banner_shown = False
 
-    # Status banner after ending
     if st.session_state.conversation_status != "ongoing":
         if not st.session_state.status_banner_shown:
             if st.session_state.conversation_status == "resolved":
@@ -395,25 +480,51 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
             "content": reply
         })
 
-        recent_history = st.session_state.chat_history[-8:]
+        recent_history = st.session_state.chat_history[-6:]
         transcript = "\n".join(
             [f"{msg['role'].upper()}: {msg['content']}" for msg in recent_history]
         )
 
         status_prompt = build_conversation_status_prompt(
             st.session_state.scenario,
-            transcript
+            transcript,
+            st.session_state.tension,
+            MAX_TENSION
         )
         status_result = evaluate_conversation_status(status_prompt)
 
         user_turns = len([m for m in st.session_state.chat_history if m["role"] == "user"])
-        if user_turns < 3 and status_result["status"] == "failed":
+        if user_turns < 2 and status_result["status"] == "failed":
             status_result["status"] = "ongoing"
-            status_result["reason"] = "The conversation is still in its early stages."
+            status_result["reason"] = "The conversation is still too early to count as a clear failure."
+
+        tension_delta = status_result.get("tension_delta", 0)
+        difficulty = st.session_state.scenario.get("difficulty", 3)
+
+        if difficulty <= 2:
+            tension_delta = max(-2, min(1, tension_delta))
+        elif difficulty == 3:
+            tension_delta = max(-2, min(2, tension_delta))
+        elif difficulty >= 4:
+            tension_delta = max(-1, min(2, tension_delta))
+
+        st.session_state.tension = max(
+            0,
+            min(MAX_TENSION, st.session_state.tension + tension_delta)
+        )
 
         st.session_state.conversation_status = status_result["status"]
         st.session_state.conversation_status_reason = status_result["reason"]
         st.session_state.status_banner_shown = False
+
+        if (
+            st.session_state.tension >= MAX_TENSION
+            and st.session_state.conversation_status == "ongoing"
+        ):
+            st.session_state.conversation_status = "failed"
+            st.session_state.conversation_status_reason = (
+                "The conversation hit a breaking point after tension reached its maximum."
+            )
 
         if user_turns >= MAX_TURNS and st.session_state.conversation_status == "ongoing":
             st.session_state.conversation_status = "failed"
@@ -425,9 +536,6 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
 
     st.markdown("---")
 
-    # ---------------------------
-    # Navigation buttons before ending
-    # ---------------------------
     if st.session_state.conversation_status == "ongoing":
         col1, col2 = st.columns(2)
 
@@ -446,9 +554,6 @@ Your goal is to **{scenario['goal']}**. Try to succeed within **{MAX_TURNS} turn
                 save_attempt_if_finished()
                 st.rerun()
 
-    # ---------------------------
-    # Navigation buttons after ending
-    # ---------------------------
     else:
         col1, col2 = st.columns(2)
 

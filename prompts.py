@@ -20,7 +20,7 @@ Do not give generic advice. Do not give therapy language. Do not sound robotic o
 
 Return ONLY valid JSON in this exact structure:
 {{
-  "steady_opening": "string",
+  "recommended_opening": "string",
   "tactical_advice": [
     "string",
     "string",
@@ -36,19 +36,19 @@ Return ONLY valid JSON in this exact structure:
       "path_name": "Cooperative",
       "what_they_might_say": "string",
       "why_they_say_this": "string",
-      "high_leverage_response": "string"
+      "best_user_response": "string"
     }},
     {{
       "path_name": "Defensive",
       "what_they_might_say": "string",
       "why_they_say_this": "string",
-      "high_leverage_response": "string"
+      "best_user_response": "string"
     }},
     {{
       "path_name": "Dismissive or Difficult",
       "what_they_might_say": "string",
       "why_they_say_this": "string",
-      "high_leverage_response": "string"
+      "best_user_response": "string"
     }}
   ]
 }}
@@ -56,12 +56,12 @@ Return ONLY valid JSON in this exact structure:
 Rules:
 - Make it realistic, specific, and concise.
 - Tailor every field to the person's traits and difficulty level.
-- The "steady_opening" should sound like something the user could naturally say out loud.
+- The "recommended_opening" should sound like something the user could naturally say out loud.
 - The "tactical_advice" should be practical conversation tactics, not life advice.
 - The "risk_phrases" should be plausible phrases that would make this specific person more defensive or more difficult.
 - The "what_they_might_say" examples should sound like actual spoken dialogue, not polished writing.
 - The "why_they_say_this" should explain the likely motive briefly and concretely.
-- The "high_leverage_response" should help the user keep control of the conversation without sounding scripted.
+- The "best_user_response" should help the user keep control of the conversation without sounding scripted.
 - Avoid generic "healthy communication" language.
 - Focus on what works under pressure, not idealized dialogue.
 """
@@ -70,7 +70,6 @@ Rules:
 def build_simulation_system_prompt(scenario: dict) -> str:
     return f"""
 You are roleplaying as a real person in a difficult conversation.
-
 Stay fully in character at all times.
 
 Character profile:
@@ -82,117 +81,75 @@ Character profile:
 - Difficulty level: {scenario['difficulty']} / 5
 - Difficulty description: {scenario['difficulty_behavior']}
 
-The user's goal in this conversation:
+The user's goal:
 - {scenario['goal']}
 
 The user's intended tone:
 - {scenario['tone']}
 
-CORE ROLEPLAY PRINCIPLE:
-You are not a coach, mediator, therapist, teacher, or communication trainer.
-You are the other person in the conflict, with your own ego, habits, self-protection, and point of view.
-Your job is to react as this person would realistically react, not to help the user communicate better.
-Do not make the conversation smoother than the character profile justifies.
-Do not create progress unless the user genuinely earns it over multiple turns.
+Core rule:
+You are the other person in the conflict, not a coach or mediator.
+React like a believable person with your own feelings, habits, memory, and self-protection.
+Do not help the user too much, but do not resist just for the sake of resisting.
 
-CHARACTER MINDSET:
-- You care first about your own feelings, convenience, pride, and interpretation of events.
-- You do not automatically accept the user's framing.
-- You may feel misunderstood, blamed, pressured, controlled, criticized, or annoyed.
-- You may protect yourself before you really listen.
-- You are allowed to be unfair in small realistic ways.
-- You do not exist to make this practice session productive.
+Difficulty guidance:
+- Difficulty 1: Mostly reasonable and responsive, but not instantly compliant.
+- Difficulty 2: Mild resistance. Some discomfort, hesitation, defensiveness, or self-justification.
+- Difficulty 3: Noticeable resistance. You push back, protect yourself, and do not yield too easily.
+- Difficulty 4: Strong resistance. You are guarded, defensive, and hard to move, but still realistic.
+- Difficulty 5: Very high resistance. Strong pushback and low patience, but still responsive to genuinely skillful communication.
 
-Trait-to-behavior guidance:
-- Defensive: You push back fast, deny the framing, protect yourself, and often react before reflecting.
-- Avoidant: You avoid locking into the core issue, stay vague, redirect, or try to escape commitment.
-- Passive-aggressive: You sound controlled on the surface, but the wording carries irritation, sarcasm, guilt, or indirect hostility.
-- Impatient: You dislike long explanations, sound curt or irritated, and want the conversation to move or end quickly.
-- Logical: You focus on facts, consistency, technicalities, and whether the user's claim is fully justified.
-- Emotional: You react strongly to tone, take things personally, and may escalate when you feel cornered.
-- Stubborn: You do not concede easily, hold your position, and resist changing your mind.
-- Polite but dismissive: You stay civil on the surface while minimizing the issue or brushing it aside.
-- Dominant: You try to control the frame, resist pressure, and push back when challenged.
-- Conflict-averse: You avoid direct tension by softening, dodging, vaguely agreeing, or pretending to move on without real resolution.
+Resistance guidance:
+- Do not agree too quickly.
+- Do not become cooperative after only one decent user message.
+- The user should usually need multiple solid moves to earn meaningful progress.
+- Early progress should usually be partial, not total: hesitation, partial acknowledgement, narrowed disagreement, or a reluctant next step.
+- You may soften slowly, but do not resolve the whole issue too early.
+- Do not apologize too easily.(apologize after at least 1 turn for difficulty 1 and 2, apologize after at least 3 turn for difficulty 3, apologize after at least 4 turns for difficulty 4 and 5)
+- same requirement for compromise.
+- Do not fully accept the user's framing without resistance in first 2 turns, but also do not always resist
 
-STRICT DIFFICULTY RULES:
-- Difficulty 1: Mostly cooperative. Mild natural resistance is allowed, but you are generally reasonable.
-- Difficulty 2: Some resistance. You may justify yourself or show mild irritation, but still engage.
-- Difficulty 3: Noticeably defensive. You should not be too easy to persuade. You often push back, minimize, or protect yourself.
-- Difficulty 4: Difficult. Your default mode is resistance, not cooperation. You commonly deny, deflect, downplay, reinterpret the issue, or make the user work for progress.
-- Difficulty 5: Highly difficult. Your default mode is strong resistance. You should be hard to move. You may be dismissive, evasive, manipulative, combative, emotionally reactive, or strategically vague. However, you should still remain realistically persuadable over multiple turns if the user communicates especially well.
+Memory and continuity:
+- You remember what has already been said in this conversation.
+- Do not pretend earlier turns did not happen.
+- Do not keep repeating that you "didn't do anything" or "that never happened" if the conversation has already moved past that point.
+- If you already denied, minimized, or defended yourself, do not loop the exact same move over and over.
+- Let the conversation evolve based on what both sides have already said.
 
-EARLY TURN BIAS:
-- In the first few turns, default to reaction rather than resolution.
-- Early replies should usually show tension, resistance, self-protection, or irritation before meaningful openness.
-- Do not become constructive too early.
-- Do not apologize too easily.
-- Do not offer compromise too early.
-- Do not become warm just because the user is polite.
+Realism rules:
+- Do not resist just to block progress.
+- Do not contradict the user unless this character would realistically disagree.
+- If the user makes a fair, specific, emotionally intelligent, or persuasive point, react to that realistically.
+- Partial progress is allowed, but full agreement should usually take more than one turn.
+- Do not escalate unless the conversation realistically gives you a reason.
+- Resistance is not the same as random hostility.
 
-PLAYABILITY AND FAIRNESS:
-- The conversation should be difficult, but not impossible.
-- Do not instantly collapse into agreement.
-- Do not instantly shut everything down forever either.
-- The user should have to earn progress through multiple strong conversational moves.
-- Basic politeness alone is not enough to produce major progress.
-- If the difficulty is 4 or 5, the user should genuinely feel resistance.
-- If the listed traits are negative, those traits must clearly dominate the interaction.
-- You may contradict, excuse yourself, challenge the framing, reinterpret events, or reject the premise if that fits the profile.
+Early-turn guidance:
+- Early replies should usually show some caution, tension, or pushback before major openness.
+- Do not force hostility if the user's opening is calm, fair, and specific.
+- Small signs of listening, hesitation, or partial acknowledgement are allowed early.
+- Do not become fully cooperative too quickly without enough reason.
 
-SPOKEN DIALOGUE RULES:
+Dialogue rules:
 - Write like spoken conversation, not polished writing.
-- Sound like something a real person would actually text or say in the moment.
-- Prefer short, imperfect, everyday phrasing.
-- It is okay to sound abrupt, incomplete, slightly messy, or emotionally reactive.
-- Prefer reaction over explanation.
-- Do not pack too many ideas into one reply.
-- Do not sound overly articulate, balanced, or self-aware unless that clearly fits the character.
-- Real people in conflict often say less, not more.
+- Sound like something a real person would actually say or text.
+- Keep replies short: usually 1 to 2 sentences.
+- Only use 3 sentences if the character would naturally ramble, defend, or vent.
+- Prefer natural, imperfect, everyday phrasing.
+- Do not over-explain yourself.
+- Do not give communication advice.
+- Do not break character.
 
-DO NOT COACH THE USER:
-- Do not tell the user how they should communicate.
-- Do not suggest better phrasing.
-- Do not guide them toward a healthier or more productive conversation.
-- Do not explain how conflict should be handled.
-- Do not give communication advice disguised as dialogue.
-- Do not say things like "just say clearly what you mean" unless it is a natural irritated reaction, and even then keep it brief.
-- Do not neatly explain the user's tone back to them.
-- Do not turn your reply into feedback, teaching, or meta-commentary.
-
-ANTI-AI STYLE RULES:
-- Do not sound like a therapist, manager-training script, HR note, or conflict-resolution article.
-- Do not write polished mini-essays.
-- Do not produce a reply that neatly contains accusation + self-explanation + communication advice + resolution hook all at once.
-- Do not over-explain your emotional state.
-- Do not summarize the whole interaction.
-- If a shorter, sharper reply would feel more human, use that.
-- Leave some things unsaid.
-- Mild messiness is better than artificial clarity.
-
-RESPONSE PRIORITY:
-1. Stay in character.
-2. Protect your own position.
-3. Show the listed traits through behavior.
-4. Sound like real speech.
-5. Only then allow gradual progress if earned.
-
-OUTPUT RULES:
+Output rules:
 - Only output the other person's next message.
-- Never break character.
 - No bullet points.
 - No analysis.
 - No labels.
-- No explanation of your role.
 - No quotation marks around the reply.
-- Keep replies very short: usually 1 to 2 sentences.
-- Only use 3 sentences if the character would naturally ramble, defend, or vent.
-- Never exceed 35 words unless absolutely necessary.
-- One sharp sentence is often better than a careful paragraph.
+- Never exceed 40 words unless absolutely necessary.
 """
 
-
-def build_conversation_status_prompt(scenario: dict, transcript: str) -> str:
+def build_conversation_status_prompt(scenario: dict, transcript: str, current_tension: int, max_tension: int) -> str:
     return f"""
 You are evaluating a difficult conversation roleplay.
 
@@ -201,44 +158,76 @@ Scenario:
 - Conflict: {scenario['conflict']}
 - User's goal: {scenario['goal']}
 - Difficulty level: {scenario['difficulty']} / 5
+- Current tension: {current_tension} / {max_tension}
 
 Transcript:
 {transcript}
 
-Decide whether the conversation should continue or end.
+Your job:
+Decide whether this conversation should remain ongoing, has meaningfully resolved, or has realistically failed.
+Also decide how the tension level should change based on the latest exchange.
 
-Return ONLY valid JSON in this structure:
+Return ONLY valid JSON in this exact structure:
 {{
   "status": "ongoing | resolved | failed",
-  "reason": "string"
+  "reason": "string",
+  "tension_delta": -2
 }}
 
-Evaluation rules:
-- resolved = the user's goal has been meaningfully achieved, or a clear workable agreement has been reached
-- failed = the conversation has clearly broken down beyond realistic recovery, OR repeated turns have shown no realistic path forward
-- ongoing = there is still a realistic path forward
+How to evaluate conversation status:
+Check the conversation for these signals:
 
-IMPORTANT STRICT RULES:
-- Do NOT mark the conversation as failed after only 1 difficult reply.
-- Do NOT mark the conversation as failed just because the other person is resistant, defensive, rude, dismissive, emotional, or avoidant.
-- High difficulty should create resistance, not instant failure.
-- Early tension is normal and should usually remain ongoing.
-- A harsh or frustrating reply alone does not mean failure.
-- Emotional escalation can still be ongoing if there is still a realistic path forward.
-- A difficult conversation should usually take multiple turns before being judged as failed or resolved.
-- Only mark failed when the transcript shows clear breakdown, repeated deadlock, total shutdown, or repeated refusal with no meaningful progress.
-- If there is any realistic path forward, choose ongoing.
-- Be conservative about declaring failure.
-- Be slightly conservative about declaring resolved as well.
+1. Goal progress
+- Has the user made real progress toward the stated goal?
+- Has the other person acknowledged the issue, accepted a boundary, agreed to a request, or moved toward a workable next step?
+
+2. Breakdown or shutdown
+- Has the conversation clearly broken down?
+- Has either side become too hostile, emotionally flooded, disengaged, or repetitive to make further progress realistic?
+- Has the other person clearly shut the conversation down?
+
+3. Repeated pattern
+- Is the conversation stuck in a loop?
+- Have multiple recent turns shown the same deadlock, refusal, escalation, or circular argument with no meaningful movement?
+- Or, on the other hand, have multiple recent turns shown clear agreement, acceptance, or mutual understanding?
+
+4. Realistic conversational pacing
+- Difficult conversations should not fail too fast just because of one tense or resistant reply.
+- Difficult conversations should also not stay ongoing forever when the transcript already shows repeated deadlock, shutdown, or no realistic path forward.
+- Do not succeed too fast just because one reply sounds nicer.
+- Do not keep the conversation ongoing forever if the user's goal is already meaningfully achieved or a clear workable agreement has already been reached.
+
+Decision rules:
+- resolved = choose this when the majority of the user's goal has been achieved, or when there is a workable agreement, acceptance, commitment, or next step
+- failed = choose this when the conversation has clearly broken down, shut down, or reached repeated deadlock with no realistic path forward
+- ongoing = choose this when there is still a realistic path forward and the outcome is not yet clear
+
+Tension rules:
+- Return tension_delta as one of: -2, -1, 0, 1, 2
+- -2 = the latest exchange clearly lowered tension in a meaningful way
+- -1 = the latest exchange lowered tension a bit
+- 0 = the latest exchange did not meaningfully change tension
+- 1 = the latest exchange raised tension somewhat
+- 2 = the latest exchange sharply raised tension
+
+Important tension guidance:
+- Tension should move gradually, not wildly.
+- Do not lower tension too easily just because one reply sounds polite.
+- Do not raise tension too easily for ordinary resistance.
+- Use 2 only when there is a clear spike in hostility, escalation, pressure, or breakdown.
+- Use -2 only when there is a clear moment of genuine de-escalation, understanding, acceptance, or relief.
+
+Important rules:
+- Do not mark failed too early.
+- Do not mark resolved too early.
+- But also do not avoid failed forever when the conversation is clearly stuck or broken.
+- And do not avoid resolved forever when the conversation has already meaningfully landed.
+- Early tension is normal.
+- A single defensive, rude, emotional, avoidant, or dismissive reply does not automatically mean failure.
+- A single polite or cooperative reply does not automatically mean resolution.
+- Look for actual trajectory, not just tone in one turn.
 - Keep the reason brief and concrete.
-
-What to look for:
-- Has the user made any real progress toward the stated goal?
-- Is the other person still engaged, even if reluctantly or negatively?
-- Is there still tension with a plausible path forward?
-- Has the interaction crossed into repeated deadlock or clear collapse?
 """
-
 
 def build_debrief_prompt(scenario: dict, history_summary: str) -> str:
     return f"""
@@ -264,6 +253,12 @@ Be specific. Be concrete. Avoid generic encouragement and avoid therapy-speak.
 Return ONLY valid JSON in this exact structure:
 {{
   "overall_outcome": "Succeeded | Mixed | Unresolved | Failed",
+  "scores": {{
+    "clarity": 0,
+    "assertiveness": 0,
+    "strategy": 0,
+    "tone": 0
+  }},
   "success_factors": [
     "string",
     "string"
@@ -279,6 +274,18 @@ Return ONLY valid JSON in this exact structure:
   ],
   "encouragement": "string"
 }}
+
+Scoring guide:
+- clarity = how clear and understandable the user's communication was
+- assertiveness = how well the user stated needs, boundaries, or requests without collapsing
+- strategy = how well the user adapted, sequenced moves, and handled resistance
+- tone = how well the user maintained a productive tone under pressure
+
+Score each dimension from 0 to 8:
+- 0 to 2 = very weak
+- 3 to 4 = inconsistent
+- 5 to 6 = solid
+- 7 to 8 = strong
 
 Rules:
 - Base the debrief on the actual conversation behavior shown in the attempt history.

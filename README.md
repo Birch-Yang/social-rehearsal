@@ -10,7 +10,7 @@ Built by Birch Yang and Yimin Yang for AI Hackathon WashU.
 
 ## Live Demo
 
-[Try the app here] 
+[Try the app here] https://social-rehearsal.streamlit.app/
 
 ## Run Locally
 

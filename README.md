@@ -4,6 +4,10 @@ Social Rehearsal is an AI-powered conversation simulator for practicing difficul
 
 It helps users map likely response paths, simulate the interaction, and receive a structured debrief afterward.
 
+## Authors
+
+Built by Birch Yang and Yimin Yang for AI Hackathon WashU.
+
 ## Live Demo
 
 [Try the app here] 

@@ -76,7 +76,8 @@ def evaluate_conversation_status(prompt: str) -> dict:
 
         fallback = {
             "status": "ongoing",
-            "reason": "Could not reliably evaluate conversation status."
+            "reason": "Could not reliably evaluate conversation status.",
+            "tension_delta": 0
         }
 
         result = _safe_json_loads(text, fallback)
@@ -84,15 +85,19 @@ def evaluate_conversation_status(prompt: str) -> dict:
         if result.get("status") not in {"ongoing", "resolved", "failed"}:
             return fallback
 
-        if "reason" not in result:
+        if "reason" not in result or not isinstance(result["reason"], str):
             result["reason"] = "No reason provided."
+
+        if result.get("tension_delta") not in {-2, -1, 0, 1, 2}:
+            result["tension_delta"] = 0
 
         return result
 
     except Exception:
         return {
             "status": "ongoing",
-            "reason": "Status evaluation temporarily failed, so the conversation will continue."
+            "reason": "Status evaluation temporarily failed, so the conversation will continue.",
+            "tension_delta": 0
         }
 
 
@@ -106,6 +111,12 @@ def generate_debrief(prompt: str) -> dict:
 
     fallback = {
         "overall_outcome": "Unresolved",
+        "scores": {
+            "clarity": 4,
+            "assertiveness": 4,
+            "strategy": 4,
+            "tone": 4
+        },
         "success_factors": [],
         "failure_patterns": [],
         "actionable_advice": [
@@ -114,4 +125,28 @@ def generate_debrief(prompt: str) -> dict:
         "encouragement": "Good luck — you have a clearer plan now."
     }
 
-    return _safe_json_loads(text, fallback)
+    result = _safe_json_loads(text, fallback)
+
+    scores = result.get("scores", {})
+    normalized_scores = {
+        "clarity": scores.get("clarity", 4),
+        "assertiveness": scores.get("assertiveness", 4),
+        "strategy": scores.get("strategy", 4),
+        "tone": scores.get("tone", 4),
+    }
+
+    for key, value in normalized_scores.items():
+        if not isinstance(value, int):
+            normalized_scores[key] = 4
+        else:
+            normalized_scores[key] = max(0, min(8, value))
+
+    result["scores"] = normalized_scores
+
+    result.setdefault("overall_outcome", fallback["overall_outcome"])
+    result.setdefault("success_factors", [])
+    result.setdefault("failure_patterns", [])
+    result.setdefault("actionable_advice", fallback["actionable_advice"])
+    result.setdefault("encouragement", fallback["encouragement"])
+
+    return result
